@@ -32,6 +32,7 @@ import static org.apache.maven.surefire.api.booter.ProviderParameterNames.TESTNG
 import static org.apache.maven.surefire.api.report.ConsoleOutputCapture.startCapture;
 import static org.apache.maven.surefire.api.report.RunMode.NORMAL_RUN;
 import static org.apache.maven.surefire.api.report.RunMode.RERUN_TEST_AFTER_FAILURE;
+import static org.apache.maven.surefire.api.testset.TestListResolver.optionallyWildcardFilter;
 import static org.apache.maven.surefire.api.util.TestsToRun.fromClass;
 import static org.apache.maven.surefire.shared.utils.StringUtils.isBlank;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
@@ -275,10 +276,10 @@ public class JUnitPlatformProvider
                 .map( TagFilter::excludeTags )
                 .ifPresent( filters::add );
 
-        TestListResolver testListResolver = parameters.getTestRequest().getTestListResolver();
-        if ( !testListResolver.isEmpty() )
+        TestListResolver filter = optionallyWildcardFilter( parameters.getTestRequest().getTestListResolver() );
+        if ( !filter.isEmpty() && !filter.isWildcard() )
         {
-            filters.add( new TestMethodFilter( testListResolver ) );
+            filters.add( new TestMethodFilter( filter ) );
         }
 
         getPropertiesList( INCLUDE_JUNIT5_ENGINES_PROP )
